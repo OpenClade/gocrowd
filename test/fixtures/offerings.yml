@@ -1,0 +1,28 @@
+# test/fixtures/offerings.yml
+one:
+  name: "Offering One"
+  status: "collecting"
+  target_amount: 100000
+  min_invest_amount: 1000
+  min_target: 50000
+  max_target: 150000
+  total_investors: 0
+  current_reserved_amount: 0
+  funded_amount: 0
+  reserved_investors: 0
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>
+
+two:
+  name: "Offering Two"
+  status: "collecting"
+  target_amount: 200000
+  min_invest_amount: 2000
+  min_target: 100000
+  max_target: 300000
+  total_investors: 10
+  current_reserved_amount: 50000
+  funded_amount: 100000
+  reserved_investors: 5
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>

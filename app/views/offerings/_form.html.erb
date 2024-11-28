@@ -1,0 +1,67 @@
+<%= form_with(model: offering) do |form| %>
+  <% if offering.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(offering.errors.count, "error") %> prohibited this offering from being saved:</h2>
+
+      <ul>
+        <% offering.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :type, style: "display: block" %>
+    <%= form.text_field :type %>
+  </div>
+
+  <div>
+    <%= form.label :state, style: "display: block" %>
+    <%= form.text_field :state %>
+  </div>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :min_invest_amount, style: "display: block" %>
+    <%= form.number_field :min_invest_amount %>
+  </div>
+
+  <div>
+    <%= form.label :min_target, style: "display: block" %>
+    <%= form.number_field :min_target %>
+  </div>
+
+  <div>
+    <%= form.label :max_target, style: "display: block" %>
+    <%= form.number_field :max_target %>
+  </div>
+
+  <div>
+    <%= form.label :total_investors, style: "display: block" %>
+    <%= form.number_field :total_investors %>
+  </div>
+
+  <div>
+    <%= form.label :current_reserved_amount, style: "display: block" %>
+    <%= form.number_field :current_reserved_amount %>
+  </div>
+
+  <div>
+    <%= form.label :funded_amount, style: "display: block" %>
+    <%= form.number_field :funded_amount %>
+  </div>
+
+  <div>
+    <%= form.label :reserved_investors, style: "display: block" %>
+    <%= form.number_field :reserved_investors %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

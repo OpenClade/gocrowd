@@ -1,0 +1,21 @@
+# test/fixtures/investors.yml
+one:
+  user: one
+  kyc_status: "approved"
+  kyc_verified_at: <%= Time.now %>
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>
+
+two:
+  user: two
+  kyc_status: "pending"
+  kyc_verified_at: <%= Time.now %>
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>
+
+three:
+  user: three
+  kyc_status: "pending"
+  kyc_verified_at: <%= Time.now %>
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>

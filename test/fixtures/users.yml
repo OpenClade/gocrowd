@@ -1,0 +1,29 @@
+# test/fixtures/users.yml
+one:
+  email: user@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  first_name: John
+  last_name: Doe
+  role: user
+
+two:
+  email: anotheruser@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  first_name: Jane
+  last_name: Smith
+  role: user
+
+three:
+  email: newuser@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  first_name: Jack
+  last_name: Black
+  role: user
+
+
+four:
+  email: admin@example.com
+  password_digest: <%= BCrypt::Password.create('password') %>
+  first_name: Admin
+  last_name: User
+  role: user

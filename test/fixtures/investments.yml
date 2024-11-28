@@ -1,0 +1,20 @@
+# test/fixtures/investments.yml
+one:
+  investor: one
+  offering: one
+  amount: 50000
+  status: "pending"
+  signed_at: <%= Time.now %>
+  confirmed_at: <%= Time.now %>
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>
+
+two:
+  investor: one
+  offering: two
+  amount: 2000
+  status: "pending"
+  signed_at: <%= Time.now %>
+  confirmed_at: <%= Time.now %>
+  created_at: <%= Time.now %>
+  updated_at: <%= Time.now %>
