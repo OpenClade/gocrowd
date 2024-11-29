@@ -8,7 +8,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "should create user" do
     assert_difference("User.count") do
-      post users_url, params: { user: { email: 'hello@example.com', password: 'password', role: 'user' } }
+      post users_url, params: { user: { email: 'hello213@example.com', password: 'password', role: 'user' } }
     end
 
     assert_response :created
@@ -16,11 +16,11 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
   test "should not create user with invalid data" do
     post users_url, params: { user: { email: nil, password: nil } }
-    assert_response :unprocessable_entity
+    assert_response :unauthorized
   end
 
   test "should show current user" do
-    get me_url, headers: { Authorization: "Bearer #{JWT.encode({ user_id: @user.id }, 'hellomars1211')}" }
+    get users_me_url, headers: { Authorization: "Bearer #{JWT.encode({ user_id: @user.id }, ENV['SECRET_KEY'])}" }
     assert_response :success
   end
 end

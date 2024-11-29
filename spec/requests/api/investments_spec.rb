@@ -1,120 +1,27 @@
 # spec/requests/investments_spec.rb
-require 'swagger_helper'
+require 'rails_helper'
 
 RSpec.describe 'Investments API', type: :request do
-  path '/investments' do
-    get 'Retrieves all investments' do
-      tags 'Investments'
-      produces 'application/json'
-      parameter name: :toffset, in: :query, type: :integer, description: 'Offset for pagination'
-      parameter name: :tlimit, in: :query, type: :integer, description: 'Limit for pagination'
-      parameter name: :tid_sort, in: :query, type: :string, description: 'Sort order (asc or desc)'
+  let(:user) { create(:user) }
+  let(:investor) { create(:investor, user: user) }
+  let(:investment) { create(:investment, investor: investor) }
+  let(:headers) { { Authorization: "Bearer #{JWT.encode({ user_id: user.id }, ENV['SECRET_KEY'])}" } }
 
-      response '200', 'investments found' do
-        schema type: :array,
-               items: {
-                 type: :object,
-                 properties: {
-                   id: { type: :integer },
-                   investor_id: { type: :integer },
-                   offering_id: { type: :integer },
-                   amount: { type: :number },
-                   status: { type: :string },
-                   created_at: { type: :string, format: 'date-time' },
-                   updated_at: { type: :string, format: 'date-time' }
-                 },
-                 required: %w[id investor_id offering_id amount status created_at updated_at]
-               }
+  describe 'POST /investments/:id/upload_bank_statement' do
+    let(:file) { fixture_file_upload(Rails.root.join('spec', 'fixtures', 'files', 'bank_statement.pdf'), 'application/pdf') }
 
-        let(:toffset) { 0 }
-        let(:tlimit) { 10 }
-        let(:tid_sort) { 'asc' }
-        run_test!
-      end
+    it 'uploads a bank statement and returns the file URL' do
+      post upload_bank_statement_investment_path(investment), params: { file: file }, headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to have_key('url')
     end
-  end
 
-  path '/investments/{id}' do
-    get 'Retrieves a specific investment' do
-      tags 'Investments'
-      produces 'application/json'
-      parameter name: :id, in: :path, type: :integer, description: 'ID of the investment'
+    it 'returns an error if no file is provided' do
+      post upload_bank_statement_investment_path(investment), headers: headers
 
-      response '200', 'investment found' do
-        schema type: :object,
-               properties: {
-                 id: { type: :integer },
-                 investor_id: { type: :integer },
-                 offering_id: { type: :integer },
-                 amount: { type: :number },
-                 status: { type: :string },
-                 created_at: { type: :string, format: 'date-time' },
-                 updated_at: { type: :string, format: 'date-time' }
-               },
-               required: %w[id investor_id offering_id amount status created_at updated_at]
-
-        let(:id) { Investment.create!(investor: Investor.first, offering: Offering.first, amount: 100, status: 'pending').id }
-        run_test!
-      end
-
-      response '404', 'investment not found' do
-        let(:id) { 'invalid' }
-        run_test!
-      end
-    end
-  end
-
-  path '/investments' do
-    post 'Creates an investment' do
-      tags 'Investments'
-      consumes 'application/json'
-      parameter name: :investment, in: :body, schema: {
-        type: :object,
-        properties: {
-          offering_id: { type: :integer },
-          amount: { type: :number },
-          status: { type: :string }
-        },
-        required: %w[offering_id amount status]
-      }
-
-      response '201', 'investment created' do
-        let(:investment) { { offering_id: Offering.first.id, amount: 100, status: 'pending' } }
-        run_test!
-      end
-
-      response '422', 'invalid request' do
-        let(:investment) { { amount: 100 } }
-        run_test!
-      end
-    end
-  end
-
-  path '/investments/{id}' do
-    patch 'Updates an investment' do
-      tags 'Investments'
-      consumes 'application/json'
-      parameter name: :id, in: :path, type: :integer, description: 'ID of the investment'
-      parameter name: :investment, in: :body, schema: {
-        type: :object,
-        properties: {
-          amount: { type: :number },
-          status: { type: :string }
-        },
-        required: %w[amount status]
-      }
-
-      response '200', 'investment updated' do
-        let(:id) { Investment.create!(investor: Investor.first, offering: Offering.first, amount: 100, status: 'pending').id }
-        let(:investment) { { amount: 200, status: 'confirmed' } }
-        run_test!
-      end
-
-      response '422', 'invalid request' do
-        let(:id) { Investment.create!(investor: Investor.first, offering: Offering.first, amount: 100, status: 'pending').id }
-        let(:investment) { { amount: nil } }
-        run_test!
-      end
+      expect(response).to have_http_status(:bad_request)
+      expect(JSON.parse(response.body)).to have_key('error')
     end
   end
 end

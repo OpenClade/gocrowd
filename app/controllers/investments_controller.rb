@@ -1,19 +1,20 @@
 # app/controllers/investments_controller.rb
-class InvestmentsController < TransactionalController
-  before_action :authorized
+class InvestmentsController < TransactionalController 
   before_action :set_investment, only: [:show, :update]
   before_action :set_offering, only: [:create]
 
   # GET /investments
   def index
-    @investor = Investor.find_by(user: current_user)
-    @investments = Investment.where(investor: @investor)
+    @investor = current_user.investor
+    if @investor.nil?
+      render json: { error: 'Investor not found' }, status: :not_found
+      return
+    end
+    @investments = @investor.investments
 
     # Apply sorting
-    if params[:tid_sort].present?
-      sort_order = params[:tid_sort] == 'desc' ? :desc : :asc
-      @investments = @investments.order(id: sort_order)
-    end
+    sort_order = params[:tid_sort] == 'desc' ? :desc : :asc
+    @investments = @investments.order(id: sort_order)
 
     # Apply pagination
     if params[:toffset].present? && params[:tlimit].present?
@@ -24,6 +25,22 @@ class InvestmentsController < TransactionalController
 
     render json: @investments
   end
+  
+
+  # POST /investments/:id/upload_bank_statement
+  def upload_bank_statement
+    @investment = Investment.find(params[:id])
+    if params[:file].present?
+      @investment.bank_statement.attach(params[:file]) 
+      if @investment.bank_statement.attached?
+        render json: {investment: @investment }, status: :ok
+      else
+        render json: { error: 'Failed to upload file' }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'No file provided' }, status: :bad_request
+    end
+  end
 
   # GET /investments/:id
   def show
@@ -32,19 +49,27 @@ class InvestmentsController < TransactionalController
 
   # POST /investments
   def create 
-    @investor = Investor.find_by(user: current_user)
+    @investor = current_user.investor
     if @investor.nil?
       render json: { error: 'Investor not found' }, status: :not_found
       return
     end
 
-    @investment = Investment.new(investment_params.merge(investor: @investor))
+    @investment = Investment.new(investment_params.merge(investor: @investor), status: 'pending')
     if @investment.valid?
       @investment.save 
       render json: @investment, status: :created
     else
       render json: { errors: @investment.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  # PUT /investments/:id/approve
+  def approve
+    @investment = Investment.find(params[:id])
+    @investment.status = 'approved'
+    @investment.save
+    render json: @investment
   end
 
   # PATCH/PUT /investments/:id
@@ -69,6 +94,6 @@ class InvestmentsController < TransactionalController
   end
 
   def investment_params
-    params.require(:investment).permit(:offering_id, :amount, :status)
+    params.require(:investment).permit(:offering_id, :amount)
   end
 end

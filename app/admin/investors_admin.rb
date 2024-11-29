@@ -10,11 +10,11 @@ Trestle.resource(:investors) do
     column :first_name, ->(investor) { investor.user.first_name }
     column :last_name, ->(investor) { investor.user.last_name }
     column :user, link: true
-    # actions do |toolbar, instance, admin|
-    #   if instance.kyc_status == 'pending'
-    #     toolbar.link 'Approve KYC', admin.path(:approve_kyc, id: instance.id), method: :post, class: 'btn btn-success', icon: 'fa fa-check'
-    #   end
-    # end
+    actions do |toolbar, instance, admin|
+      if instance.kyc_status == 'pending'
+        toolbar.link 'Approve KYC', admin.path(:approve_kyc, id: instance.id), method: :post, class: 'btn btn-success', icon: 'fa fa-check'
+      end
+    end
   end
 
   form do |investor|

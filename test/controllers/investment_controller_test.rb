@@ -7,7 +7,7 @@ class InvestmentsControllerTest < ActionDispatch::IntegrationTest
     @investor = investors(:one)
     @offering = offerings(:two)
     @user = users(:one)
-    @headers = { Authorization: "Bearer #{JWT.encode({ user_id: @user.id }, 'hellomars1211')}" }
+    @headers = { Authorization: "Bearer #{JWT.encode({ user_id: @user.id }, ENV['SECRET_KEY'])}" }
   end
 
   test "should get index" do
@@ -41,5 +41,11 @@ class InvestmentsControllerTest < ActionDispatch::IntegrationTest
   test "should not update investment with invalid data" do
     patch investment_url(@investment), params: { investment: { amount: nil, status: nil } }, headers: @headers
     assert_response :not_found
+  end
+
+  test "should upload bank statement" do
+    file = fixture_file_upload(Rails.root.join('test', 'fixtures', 'files', 'bank_statement.pdf'), 'application/pdf')
+    post upload_bank_statement_investment_url(@investment), params: { file: file }, headers: @headers
+    assert_response :ok
   end
 end

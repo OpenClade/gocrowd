@@ -1,6 +1,5 @@
 # app/controllers/users_controller.rb
-class UsersController < TransactionalController
-  skip_before_action :authorized, only: [:create]
+class UsersController < TransactionalController 
   rescue_from ActiveRecord::RecordInvalid, with: :handle_invalid_record
 
   def create

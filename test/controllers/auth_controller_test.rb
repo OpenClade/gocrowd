@@ -7,12 +7,12 @@ class AuthControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should login user" do
-    post auth_login_url, params: { auth: { email: @user.email, password: 'password' } }
+    post auths_login_url, params: { auth: { email: @user.email, password: 'password' } }
     assert_response :accepted
   end
 
   test "should not login user with invalid credentials" do
-    post auth_login_url, params: { auth: { email: @user.email, password: 'wrongpassword' } }
+    post auths_login_url, params: { auth: { email: @user.email, password: 'wrongpassword' } }
     assert_response :unauthorized
   end
 end

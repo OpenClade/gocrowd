@@ -4,6 +4,8 @@ class Investment < ApplicationRecord
   belongs_to :offering
 
   enum status: { pending: 0, signed: 1, confirmed: 2, received: 3, hidden: 4 }
+  
+  has_one_attached :bank_statement
 
   validates :amount, presence: true
   validates :status, presence: true

@@ -1,6 +1,6 @@
 # app/controllers/transactional_controller.rb
 class TransactionalController < ApplicationController
-  around_action :wrap_in_transaction
+  around_action :wrap_in_transaction, except: :index
 
   private
 

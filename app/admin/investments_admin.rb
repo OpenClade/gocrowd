@@ -17,7 +17,15 @@ Trestle.resource(:investments) do
     column :created_at, align: :center
     actions do |toolbar, instance, admin|
       if instance.status == 'pending'
-        toolbar.link "Mark as Received", admin.path(:mark_received, id: instance.id), method: :post, class: "btn btn-success"
+        toolbar.link "Mark as Received", admin.path(:mark_received, id: instance.id), method: :put, class: "btn btn-success"
+      end
+    end
+
+    column :bank_statement do |investment|
+      if investment.bank_statement.attached? 
+        link_to "Approve", admin.path(:approve, id: instance.id), method: :put, class: "btn btn-success"
+      else
+        "No file attached"
       end
     end
   end
@@ -56,8 +64,16 @@ Trestle.resource(:investments) do
     end
   end
 
+  def approve
+    investment = Investment.find(params[:id])
+    investment.status = 'approved'
+    investment.save
+    redirect_to admin.path(:show, id: investment.id)
+  end
+
   routes do
-    get :mark_received, on: :member
-    get :mark_pending, on: :member
+    put :mark_received, on: :member
+    put :mark_pending, on: :member
+    put :approve, on: :member
   end
 end
