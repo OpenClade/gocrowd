@@ -9,6 +9,8 @@ gem "importmap-rails"
 gem "turbo-rails"
 gem "stimulus-rails"
 gem "jbuilder"
+gem "state_machines"
+gem "state_machines-activerecord"
 
 # Web server
 gem "puma", ">= 5.0"

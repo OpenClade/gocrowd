@@ -4,295 +4,17 @@ info:
   title: API V1
   version: v1
 paths:
-  "/investments":
-    get:
-      summary: Retrieves all investments
-      tags:
-      - Investments
-      parameters:
-      - name: toffset
-        in: query
-        description: Offset for pagination
-        schema:
-          type: integer
-      - name: tlimit
-        in: query
-        description: Limit for pagination
-        schema:
-          type: integer
-      - name: tid_sort
-        in: query
-        description: Sort order (asc or desc)
-        schema:
-          type: string
-      responses:
-        '200':
-          description: investments found
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: integer
-                    investor_id:
-                      type: integer
-                    offering_id:
-                      type: integer
-                    amount:
-                      type: number
-                    status:
-                      type: string
-                    created_at:
-                      type: string
-                      format: date-time
-                    updated_at:
-                      type: string
-                      format: date-time
-                  required:
-                  - id
-                  - investor_id
-                  - offering_id
-                  - amount
-                  - status
-                  - created_at
-                  - updated_at
+  "/api/v1/auth/login":
     post:
-      summary: Creates an investment
+      summary: Авторизует пользователя и возвращает токен
       tags:
-      - Investments
+      - Auth
       parameters: []
       responses:
-        '201':
-          description: investment created
-        '422':
-          description: invalid request
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                offering_id:
-                  type: integer
-                amount:
-                  type: number
-                status:
-                  type: string
-              required:
-              - offering_id
-              - amount
-              - status
-  "/investments/{id}":
-    get:
-      summary: Retrieves a specific investment
-      tags:
-      - Investments
-      parameters:
-      - name: id
-        in: path
-        description: ID of the investment
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: investment found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  investor_id:
-                    type: integer
-                  offering_id:
-                    type: integer
-                  amount:
-                    type: number
-                  status:
-                    type: string
-                  created_at:
-                    type: string
-                    format: date-time
-                  updated_at:
-                    type: string
-                    format: date-time
-                required:
-                - id
-                - investor_id
-                - offering_id
-                - amount
-                - status
-                - created_at
-                - updated_at
-        '404':
-          description: investment not found
-    patch:
-      summary: Updates an investment
-      tags:
-      - Investments
-      parameters:
-      - name: id
-        in: path
-        description: ID of the investment
-        required: true
-        schema:
-          type: integer
-      responses:
-        '200':
-          description: investment updated
-        '422':
-          description: invalid request
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                amount:
-                  type: number
-                status:
-                  type: string
-              required:
-              - amount
-              - status
-  "/investors/{id}":
-    get:
-      summary: Retrieve an investor
-      tags:
-      - Investors
-      parameters:
-      - name: id
-        in: path
-        description: Investor ID
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Investor found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  kyc_status:
-                    type: string
-                  kyc_verified_at:
-                    type: string
-                    format: datetime
-                  user_id:
-                    type: integer
-                required:
-                - id
-                - kyc_status
-                - user_id
-        '404':
-          description: Investor not found
-    put:
-      summary: Update an investor
-      tags:
-      - Investors
-      parameters:
-      - name: id
-        in: path
-        description: Investor ID
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Investor updated
-        '404':
-          description: Investor not found
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                kyc_status:
-                  type: string
-                kyc_verified_at:
-                  type: string
-                  format: datetime
-  "/investors":
-    post:
-      summary: Create an investor
-      tags:
-      - Investors
-      parameters: []
-      responses:
-        '201':
-          description: Investor created
-        '422':
-          description: Invalid request
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                kyc_status:
-                  type: string
-                kyc_verified_at:
-                  type: string
-                  format: datetime
-              required:
-              - kyc_status
-  "/offerings":
-    get:
-      summary: Retrieves all offerings
-      responses:
-        '200':
-          description: offerings found
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  properties:
-                    id:
-                      type: integer
-                    type:
-                      type: string
-                    state:
-                      type: string
-                    name:
-                      type: string
-                    min_invest_amount:
-                      type: integer
-                    min_target:
-                      type: integer
-                    max_target:
-                      type: integer
-                    total_investors:
-                      type: integer
-                    current_reserved_amount:
-                      type: integer
-                    funded_amount:
-                      type: integer
-                    reserved_investors:
-                      type: integer
-  "/users":
-    post:
-      summary: Register a new user
-      tags:
-      - Users
-      parameters: []
-      responses:
-        '201':
-          description: User created
-        '422':
-          description: Validation errors
+        '202':
+          description: Login successful
         '401':
-          description: User already exists
+          description: User doesn't exist
       requestBody:
         content:
           application/json:
@@ -305,25 +27,197 @@ paths:
                 password:
                   type: string
                   example: password123
-                role:
-                  type: string
-                  example: user
-                  default: user
               required:
               - email
               - password
-  "/me":
+        required: true
+  "/api/v1/investments":
     get:
-      summary: Get the current user
+      summary: Возвращает все инвестиции текущего пользователя
+      tags:
+      - Investments
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Investments found
+        '404':
+          description: Investor not found
+    post:
+      summary: Создает новую инвестицию
+      tags:
+      - Investments
+      parameters: []
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: Investment created
+        '422':
+          description: Invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                offering_id:
+                  type: integer
+                amount:
+                  type: number
+              required:
+              - offering_id
+              - amount
+        required: true
+  "/api/v1/investments/{id}/upload_bank_statement":
+    post:
+      summary: Загружает банковскую выписку для инвестиции
+      tags:
+      - Investments
+      parameters:
+      - name: id
+        in: path
+        description: Investment ID
+        required: true
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Bank statement uploaded
+        '422':
+          description: Invalid file
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: file
+        description: Bank Statement
+  "/api/v1/investors/me":
+    get:
+      summary: Возвращает информацию о текущем инвесторе
+      tags:
+      - Investors
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: Investor found
+        '404':
+          description: Investor not found
+  "/api/v1/investors":
+    post:
+      summary: Создает нового инвестора
+      tags:
+      - Investors
+      parameters: []
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: Investor created
+        '422':
+          description: Invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                kyc_verified_at:
+                  type: string
+                  format: date-time
+              required:
+              - kyc_verified_at
+        required: true
+  "/api/v1/offerings":
+    get:
+      summary: Возвращает список офферингов
+      tags:
+      - Offerings
+      responses:
+        '200':
+          description: Offerings found
+        '404':
+          description: Offerings not found
+  "/api/v1/users":
+    post:
+      summary: Создает нового пользователя
+      tags:
+      - Users
+      parameters: []
+      responses:
+        '201':
+          description: User created
+        '401':
+          description: User already exists
+        '422':
+          description: Invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+              required:
+              - email
+              - password
+              - role
+        required: true
+  "/api/v1/me":
+    get:
+      summary: Возвращает информацию о текущем пользователе
       tags:
       - Users
       security:
       - bearerAuth: []
       responses:
         '200':
-          description: Current user retrieved
+          description: User found
         '401':
           description: Unauthorized
+  "/api/v1/users/{id}":
+    put:
+      summary: Обновляет информацию о пользователе
+      tags:
+      - Users
+      parameters:
+      - name: id
+        in: path
+        description: User ID
+        required: true
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: User updated
+        '401':
+          description: Unauthorized
+        '422':
+          description: Invalid request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+              - email
+              - password
+        required: true
 servers:
 - url: http://{defaultHost}
   variables:
@@ -338,5 +232,3 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-security:
-- bearerAuth: []

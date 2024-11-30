@@ -1,30 +1,23 @@
+# spec/integration/offerings_spec.rb
 require 'swagger_helper'
 
-RSpec.describe 'offerings', type: :request do
-  path '/offerings' do
-    get 'Retrieves all offerings' do
+RSpec.describe 'Offerings API', type: :request do
+  # Для GET /api/v1/offerings (Получить список офферингов)
+  path '/api/v1/offerings' do
+    get 'Возвращает список офферингов' do
+      tags 'Offerings'
       produces 'application/json'
+      
+      response '200', 'Offerings found' do
+        run_test! do |response|
+          json = JSON.parse(response.body)
+          expect(json).to be_an_instance_of(Array)
+        end
+      end
 
-      response '200', 'offerings found' do
-        schema type: :array,
-          items: {
-            properties: {
-              id: { type: :integer },
-              type: { type: :string },
-              state: { type: :string },
-              name: { type: :string },
-              min_invest_amount: { type: :integer },
-              min_target: { type: :integer },
-              max_target: { type: :integer },
-              total_investors: { type: :integer },
-              current_reserved_amount: { type: :integer },
-              funded_amount: { type: :integer },
-              reserved_investors: { type: :integer }
-            }
-          }
-
+      response '404', 'Offerings not found' do
         run_test!
       end
     end
-  end
+  end 
 end

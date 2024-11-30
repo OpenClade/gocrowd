@@ -1,53 +1,125 @@
+# spec/integration/users_spec.rb
 require 'swagger_helper'
 
 RSpec.describe 'Users API', type: :request do
-  path '/users' do
-    post 'Register a new user' do
+  # Для POST /api/v1/users (Создание нового пользователя)
+  path '/api/v1/users' do
+    post 'Создает нового пользователя' do
       tags 'Users'
       consumes 'application/json'
       produces 'application/json'
 
-      parameter name: :user, in: :body, schema: {
+      parameter name: :user, in: :body, required: true, schema: {
         type: :object,
         properties: {
-          email: { type: :string, example: 'user@example.com' },
-          password: { type: :string, example: 'password123' },
-          role: { type: :string, example: 'user', default: 'user' }
+          email: { type: :string },
+          password: { type: :string },
+          role: { type: :string }
         },
-        required: %w[email password]
+        required: ['email', 'password', 'role']
       }
 
       response '201', 'User created' do
-        let(:user) { { email: 'newuser@example.com', password: 'password123', role: 'user' } }
-        run_test!
-      end
-
-      response '422', 'Validation errors' do
-        let(:user) { { email: '', password: '' } }
-        run_test!
+        let(:user) { { email: 'test@example.com', password: 'password123'} }
+        run_test! do |response|
+          json = JSON.parse(response.body)
+          expect(json['user']['email']).to eq('test@example.com')
+        end
       end
 
       response '401', 'User already exists' do
-        let!(:existing_user) { create(:user, email: 'user@example.com') }
-        let(:user) { { email: 'user@example.com', password: 'password123' } }
+        let(:user) { { email: 'existing@example.com', password: 'password123'} }
+        before do
+          create(:user, email: 'existing@example.com', password: 'password123')
+        end
+        run_test!
+      end
+
+      response '422', 'Invalid request' do
+        let(:user) { { email: '', password: 'password123'} }
         run_test!
       end
     end
   end
 
-  path '/me' do
-    get 'Get the current user' do
+  # Для GET /api/v1/me (Получить информацию о текущем пользователе)
+  path '/api/v1/me' do
+    get 'Возвращает информацию о текущем пользователе' do
       tags 'Users'
       produces 'application/json'
-      security [bearerAuth: []] # Используйте токен авторизации
+      
+      security [bearerAuth: []]  # Если используется аутентификация через токен
+      
+      response '200', 'User found' do
+        let(:Authorization) { "Bearer #{generate_jwt_token(user_id: 1)}" }  # Генерация JWT токена для теста
+        let(:user) { create(:user, id: 1, email: 'test@example.com') }
 
-      response '200', 'Current user retrieved' do
-        let(:Authorization) { "Bearer #{JWT.encode({ user_id: create(:user).id }, Rails.application.secrets.secret_key_base)}" }
+        before do
+          user
+        end
+        
+        run_test! do |response|
+          json = JSON.parse(response.body)
+          expect(json['email']).to eq('test@example.com')
+        end
+      end
+      
+      security [bearerAuth: []]
+
+      response '401', 'Unauthorized' do
+        let(:Authorization) { "Bearer invalid_token" }
+        run_test!
+      end
+    end
+  end
+
+  # Для PUT /api/v1/users (Обновить пользователя)
+  path '/api/v1/users/{id}' do
+    put 'Обновляет информацию о пользователе' do
+      tags 'Users'
+      consumes 'application/json'
+      produces 'application/json'
+      
+      parameter name: :id, in: :path, type: :string, description: 'User ID'
+      parameter name: :user, in: :body, required: true, schema: {
+        type: :object,
+        properties: {
+          email: { type: :string },
+          password: { type: :string } 
+        },
+        required: ['email', 'password']
+      }
+
+      response '200', 'User updated' do
+        let(:user) { create(:user, id: 1, email: 'update@example.com') }
+        let(:Authorization) { "Bearer #{generate_jwt_token(user_id: 1)}" }  # Генерация токена
+        let(:updated_user) { { email: 'updated@example.com', password: 'newpassword123' } }
+
+        before do
+          user
+        end
+
+        run_test! do |response|
+          json = JSON.parse(response.body)
+          expect(json['email']).to eq('updated@example.com')
+        end
+      end
+      
+      security [bearerAuth: []]
+
+      response '401', 'Unauthorized' do
+        let(:Authorization) { "Bearer invalid_token" }
         run_test!
       end
 
-      response '401', 'Unauthorized' do
-        let(:Authorization) { nil }
+      response '422', 'Invalid request' do
+        let(:user) { create(:user, id: 1, email: 'invalid@example.com') }
+        let(:Authorization) { "Bearer #{generate_jwt_token(user_id: 1)}" }
+        let(:updated_user) { { email: '', password: 'newpassword123'} }
+
+        before do
+          user
+        end
         run_test!
       end
     end

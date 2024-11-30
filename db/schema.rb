@@ -53,20 +53,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_29_095451) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "articles", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.boolean "unpublished"
-    t.string "title"
-  end
-
-  create_table "comments", force: :cascade do |t|
-    t.string "author"
-    t.text "body"
-    t.integer "post_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
 
   create_table "investments", force: :cascade do |t|
     t.bigint "investor_id", null: false
