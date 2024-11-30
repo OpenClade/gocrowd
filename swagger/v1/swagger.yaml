@@ -171,7 +171,7 @@ paths:
               - password
               - role
         required: true
-  "/api/v1/me":
+  "/api/v1/users/me":
     get:
       summary: Возвращает информацию о текущем пользователе
       tags:
@@ -183,41 +183,6 @@ paths:
           description: User found
         '401':
           description: Unauthorized
-  "/api/v1/users/{id}":
-    put:
-      summary: Обновляет информацию о пользователе
-      tags:
-      - Users
-      parameters:
-      - name: id
-        in: path
-        description: User ID
-        required: true
-        schema:
-          type: string
-      security:
-      - bearerAuth: []
-      responses:
-        '200':
-          description: User updated
-        '401':
-          description: Unauthorized
-        '422':
-          description: Invalid request
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-              required:
-              - email
-              - password
-        required: true
 servers:
 - url: http://{defaultHost}
   variables:

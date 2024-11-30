@@ -1,6 +1,8 @@
 module Api 
   module V1
-    class OfferingsController < ActionController::API
+    class OfferingsController < ApplicationController
+      skip_before_action :authorized, only: %i[index show]
+
       # GET /offerings or /offerings.json
       def index
         @offerings = Offering.all

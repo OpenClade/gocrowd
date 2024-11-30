@@ -6,7 +6,7 @@ class Offering < ApplicationRecord
 
   after_update :offering_callback
 
-  state_machine :status, initial: :draft, ignore_method_conflicts: true do
+  state_machine :status, initial: :draft do
     state :draft
     state :collecting
     state :closed

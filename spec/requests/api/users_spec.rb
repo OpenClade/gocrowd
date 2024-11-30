@@ -42,8 +42,8 @@ RSpec.describe 'Users API', type: :request do
     end
   end
 
-  # Для GET /api/v1/me (Получить информацию о текущем пользователе)
-  path '/api/v1/me' do
+  # Для GET /api/v1/users/me (Получить информацию о текущем пользователе)
+  path '/api/v1/users/me' do
     get 'Возвращает информацию о текущем пользователе' do
       tags 'Users'
       produces 'application/json'
@@ -71,57 +71,5 @@ RSpec.describe 'Users API', type: :request do
         run_test!
       end
     end
-  end
-
-  # Для PUT /api/v1/users (Обновить пользователя)
-  path '/api/v1/users/{id}' do
-    put 'Обновляет информацию о пользователе' do
-      tags 'Users'
-      consumes 'application/json'
-      produces 'application/json'
-      
-      parameter name: :id, in: :path, type: :string, description: 'User ID'
-      parameter name: :user, in: :body, required: true, schema: {
-        type: :object,
-        properties: {
-          email: { type: :string },
-          password: { type: :string } 
-        },
-        required: ['email', 'password']
-      }
-
-      response '200', 'User updated' do
-        let(:user) { create(:user, id: 1, email: 'update@example.com') }
-        let(:Authorization) { "Bearer #{generate_jwt_token(user_id: 1)}" }  # Генерация токена
-        let(:updated_user) { { email: 'updated@example.com', password: 'newpassword123' } }
-
-        before do
-          user
-        end
-
-        run_test! do |response|
-          json = JSON.parse(response.body)
-          expect(json['email']).to eq('updated@example.com')
-        end
-      end
-      
-      security [bearerAuth: []]
-
-      response '401', 'Unauthorized' do
-        let(:Authorization) { "Bearer invalid_token" }
-        run_test!
-      end
-
-      response '422', 'Invalid request' do
-        let(:user) { create(:user, id: 1, email: 'invalid@example.com') }
-        let(:Authorization) { "Bearer #{generate_jwt_token(user_id: 1)}" }
-        let(:updated_user) { { email: '', password: 'newpassword123'} }
-
-        before do
-          user
-        end
-        run_test!
-      end
-    end
-  end
+  end 
 end
