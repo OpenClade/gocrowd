@@ -45,7 +45,6 @@ gem "rswag", "~> 2.16"
 group :development, :test do
   gem "factory_bot_rails"
   gem "rspec-rails", "6.1.0" 
-  gem "rails-controller-testing" 
   gem "debug", platforms: %i[ mri mswin mswin64 mingw x64_mingw ]
 end
 
