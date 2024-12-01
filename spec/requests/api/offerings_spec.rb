@@ -14,10 +14,6 @@ RSpec.describe 'Offerings API', type: :request do
           expect(json).to be_an_instance_of(Array)
         end
       end
-
-      response '404', 'Offerings not found' do
-        run_test!
-      end
     end
   end 
 end

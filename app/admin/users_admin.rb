@@ -27,7 +27,6 @@ Trestle.resource(:users) do
       if params[:user][:password].blank?
         params[:user].delete(:password)
       end
-      super
     end
   end
 end

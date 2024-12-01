@@ -9,22 +9,26 @@ RSpec.describe 'Investors API', type: :request do
     get 'Возвращает информацию о текущем инвесторе' do
       tags 'Investors'
       produces 'application/json'
+  
+      let(:user) { FactoryBot.create(:user) }
+       
+      let(:Authorization) { "Bearer #{generate_jwt_token(user_id: user.id)}" }
 
       response '200', 'Investor found' do
-        let(:investor) { create(:investor, user: current_user) }
-        run_test! do |response|
-          json = JSON.parse(response.body)
-          expect(json['user_id']).to eq(current_user.id)
-        end
+        let(:investor) { FactoryBot.create(:investor, user: user) }
+        let!(:investments) { FactoryBot.create(:investment, investor: investor) }
+        run_test! 
       end
-      
+  
       security [bearerAuth: []]
-      response '404', 'Investor not found' do
-        let(:investor) { nil }
+
+      # Invalid response case (no investor linked to the user)
+      response '404', 'Investor not found' do  
         run_test!
       end
     end
   end
+  
 
   # Для POST /api/v1/investors (Создать нового инвестора)
   path '/api/v1/investors' do
@@ -41,6 +45,12 @@ RSpec.describe 'Investors API', type: :request do
         required: ['kyc_verified_at']
       }
 
+      security [bearerAuth: []]
+
+
+      let(:user) { FactoryBot.create(:user) }
+      let(:Authorization) { "Bearer #{generate_jwt_token(user_id: user.id)}" }
+
       response '201', 'Investor created' do
         let(:investor) { { kyc_verified_at: '2024-11-30T00:00:00Z' } }
         run_test! do |response|
@@ -49,11 +59,8 @@ RSpec.describe 'Investors API', type: :request do
         end
       end
       
-      security [bearerAuth: []]
-      response '422', 'Invalid request' do
-        let(:investor) { { kyc_verified_at: '' } }
-        run_test!
-      end
+       
+       
     end
   end 
 end

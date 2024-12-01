@@ -15,7 +15,9 @@ Rails.application.routes.draw do
       resources :investors, only: %i[index create] do 
         get :me, on: :collection
       end
-      resources :investments, only: %i[index create]
+      resources :investments, only: %i[index create] do
+        post :upload_bank_statement, on: :member
+      end
       resources :offerings, only: %i[index]      
     end
   end

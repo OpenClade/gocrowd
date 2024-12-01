@@ -7,10 +7,6 @@ class Offering < ApplicationRecord
   after_update :offering_callback
 
   state_machine :status, initial: :draft do
-    state :draft
-    state :collecting
-    state :closed
-    state :completed
 
     event :start_collecting do
       transition from: :draft, to: :collecting
@@ -22,14 +18,7 @@ class Offering < ApplicationRecord
 
     event :complete do
       transition from: :closed, to: :completed
-    end
-
-    state :completed do
-      def offering_callback
-        handle_investments_on_complete
-      end
-    end
-    
+    end 
   end
 
   
@@ -39,11 +28,17 @@ class Offering < ApplicationRecord
 
   def handle_investments_on_complete
  
-    investments.each do |investment|
-      if investment.status != 'received'
+    investments.find_each do |investment|
+      if investment.status != 'received' && investment.status != 'hidden'
         investment.hide!
         investment.save
       end
     end
+  end
+
+  private
+
+  def offering_callback
+    handle_investments_on_complete if status == 'completed' 
   end
 end

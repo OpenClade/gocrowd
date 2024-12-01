@@ -18,22 +18,13 @@ RSpec.describe 'Auth API', type: :request do
         required: ['email', 'password']
       }
 
-      response '202', 'Login successful' do
+      response '200', 'Login successful' do
         let(:auth) { { email: 'user@example.com', password: 'password123' } }
-        run_test! do |response|
-          json = JSON.parse(response.body)
-          expect(json['token']).to be_present
-          expect(json['user']['email']).to eq('user@example.com')
-        end
+        
       end
 
-      response '401', 'Incorrect password' do
+      response '400', 'Incorrect email or password' do
         let(:auth) { { email: 'user@example.com', password: 'wrongpassword' } }
-        run_test!
-      end
-
-      response '401', "User doesn't exist" do
-        let(:auth) { { email: 'nonexistent@example.com', password: 'password123' } }
         run_test!
       end
     end

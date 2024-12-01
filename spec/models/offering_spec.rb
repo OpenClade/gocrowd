@@ -1,105 +1,69 @@
+# spec/models/offering_spec.rb
 require 'rails_helper'
 
-RSpec.describe Api::V1::OfferingsController, type: :controller do
-  let(:user) { create(:user) }  # Assumes you have a User factory
-  let(:offering) { create(:offering) }  # Assumes you have an Offering factory
-
-  before do
-    sign_in(user)  # Assumes you are using Devise or a similar authentication method
+RSpec.describe Offering, type: :model do
+  let(:offering) do
+    FactoryBot.build(:offering,
+      name: 'Tech Startup',
+      min_invest_amount: 1000,
+      min_target: 50000,
+      max_target: 100000,
+      total_investors: 10,
+      current_reserved_amount: 20000,
+      funded_amount: 30000,
+      reserved_investors: 5,
+      target_amount: 75000,
+      can_advance_state: true,
+      status: :draft
+    )
   end
 
-  describe 'GET #index' do
-    context 'when there are offerings' do
-      before do
-        create_list(:offering, 5)  # Assumes you have an Offering factory
-      end
-
-      it 'returns a list of offerings' do
-        get :index
-
-        json_response = JSON.parse(response.body)
-        expect(response).to have_http_status(:ok)
-        expect(json_response.length).to eq(5)  # Should return 5 offerings
-      end
-
-      it 'returns offerings sorted by id in ascending order' do
-        get :index, params: { sort: 'asc' }
-        json_response = JSON.parse(response.body)
-
-        expect(response).to have_http_status(:ok)
-        expect(json_response.first['id']).to be < json_response.last['id']  # Should be sorted in ascending order
-      end
-
-      it 'returns offerings with pagination when requested' do
-        get :index, params: { page: 1, per_page: 2 }
-
-        json_response = JSON.parse(response.body)
-        expect(response).to have_http_status(:ok)
-        expect(json_response.length).to eq(2)  # Should return only 2 offerings
-      end
+  describe 'Validations' do
+    it 'is valid with valid attributes' do
+      expect(offering).to be_valid
     end
 
-    context 'when there are no offerings' do
-      it 'returns an empty array' do
-        get :index
-
-        json_response = JSON.parse(response.body)
-        expect(response).to have_http_status(:ok)
-        expect(json_response).to eq([])  # Should return an empty array if no offerings exist
-      end
-    end
-  end
-
-  describe 'GET #show' do
-    it 'returns the requested offering' do
-      get :show, params: { id: offering.id }
-
-      json_response = JSON.parse(response.body)
-      expect(response).to have_http_status(:ok)
-      expect(json_response['id']).to eq(offering.id)
+    it 'is valid change state from draft to collecting' do
+      offering.start_collecting
+      expect(offering.status).to eq('collecting')
     end
 
-    it 'returns an error if the offering does not exist' do
-      get :show, params: { id: 'nonexistent' }
+    it 'is valid change state from collecting to closed' do
+      offering.start_collecting
+      offering.close
+      expect(offering.status).to eq('closed')
+    end
 
-      json_response = JSON.parse(response.body)
-      expect(response).to have_http_status(:not_found)
-      expect(json_response['error']).to eq('Offering not found')
+    it 'is valid change state from closed to completed' do
+      offering.start_collecting
+      offering.close
+      offering.complete
+      expect(offering.status).to eq('completed')
+    end
+
+    it 'is not valid without a status' do
+      offering.status = nil
+      expect(offering).to_not be_valid
+    end
+
+    it 'is not valid if status equal to draft, but state going to closed' do
+      offering.status = 'draft'
+      offering.close
+      expect(offering.status).to_not eq('closed')
+    end
+
+    it 'is not valid without a name' do
+      offering.name = nil
+      expect(offering).to_not be_valid
     end
   end
 
-  describe 'PUT #update' do
-    context 'when the offering exists and is updated successfully' do
-      it 'updates the offering' do
-        updated_params = { name: 'Updated Offering', status: 'approved' }
-
-        put :update, params: { id: offering.id, offering: updated_params }
-
-        json_response = JSON.parse(response.body)
-        expect(response).to have_http_status(:ok)
-        expect(json_response['name']).to eq('Updated Offering')
-        expect(json_response['status']).to eq('approved')
-      end
-    end
-
-    context 'when the offering exists but cannot be updated' do
-      it 'returns errors when validation fails' do
-        put :update, params: { id: offering.id, offering: { name: nil } }  # Assuming 'name' is required
-
-        json_response = JSON.parse(response.body)
-        expect(response).to have_http_status(:unprocessable_entity)
-        expect(json_response['name']).to include("can't be blank")
-      end
-    end
-
-    context 'when the offering does not exist' do
-      it 'returns an error' do
-        put :update, params: { id: 'nonexistent', offering: { name: 'Updated Offering' } }
-
-        json_response = JSON.parse(response.body)
-        expect(response).to have_http_status(:not_found)
-        expect(json_response['error']).to eq('Offering not found')
-      end
+  describe 'Callbacks' do
+    it 'calls handle_investments_on_complete when status is completed' do
+      offering.start_collecting
+      offering.close
+      expect(offering).to receive(:handle_investments_on_complete)
+      offering.complete
     end
   end
 end

@@ -9,7 +9,7 @@ class User < ApplicationRecord
   # Метод для создания и сохранения пользователя
   def self.create_user(email, password) 
     user = User.new(email: email, password: password)
-    if user.save
+    if user.save 
       user
     else
       raise ActiveRecord::RecordInvalid.new(user)

@@ -91,8 +91,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_11_29_095451) do
   end
 
   create_table "offerings", force: :cascade do |t|
-    t.string "type"
-    t.string "state"
+    t.string "type" 
     t.string "name"
     t.integer "min_invest_amount"
     t.integer "min_target"

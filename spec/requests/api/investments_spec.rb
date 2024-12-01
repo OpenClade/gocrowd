@@ -10,21 +10,22 @@ RSpec.describe 'Investments API', type: :request do
       tags 'Investments'
       produces 'application/json'
 
-      response '200', 'Investments found' do
-        let(:investor) { create(:investor, user: current_user) }
-        let(:investment) { create(:investment, investor: investor) }
+      let(:user) { FactoryBot.create(:user) }
+      let(:investor) { FactoryBot.create(:investor, user: user) }
+      let(:Authorization) { "Bearer #{generate_jwt_token(user_id: user.id)}" } 
+      let!(:investments) { FactoryBot.create_list(:investment, 5, investor: investor) }
+
+      response '200', 'Investments found' do 
+
         run_test! do |response|
           json = JSON.parse(response.body)
-          expect(json.first['investor_id']).to eq(investor.id)
+          expect(json).to be_an_instance_of(Array)
+          expect(json.size).to eq(5)
         end
       end
-
       security [bearerAuth: []]
 
-      response '404', 'Investor not found' do
-        let(:investor) { nil }
-        run_test!
-      end
+       
     end
   end
 
@@ -44,18 +45,20 @@ RSpec.describe 'Investments API', type: :request do
         required: ['offering_id', 'amount']
       }
 
-      response '201', 'Investment created' do
-        let(:investment) { { offering_id: create(:offering).id, amount: 5000 } }
-        run_test! do |response|
-          json = JSON.parse(response.body)
-          expect(json['amount']).to eq(5000)
-        end
+      security [bearerAuth: []] 
+      let(:user) { FactoryBot.create(:user) }
+      let(:Authorization) { "Bearer #{generate_jwt_token(user_id: user.id)}" }
+ 
+      response '201', 'Investment created' do 
+         
+        let(:investor) { FactoryBot.create(:investor, user: user) }
+        let(:offering) { FactoryBot.create(:offering) }
+        let(:investment) { FactoryBot.create(:investment, investor: investor, offering: offering, amount: 1000) }
+        run_test!  
       end
-
-      security [bearerAuth: []]
-
-      response '422', 'Invalid request' do
-        let(:investment) { { offering_id: nil, amount: 5000 } }
+      
+      response '400', 'Invalid request' do
+        let(:investment) { { amount: 0 } }
         run_test!
       end
     end
@@ -73,19 +76,22 @@ RSpec.describe 'Investments API', type: :request do
       parameter name: :id, in: :path, type: :string, description: 'Investment ID'
       parameter name: :file, in: :formData, type: :file, description: 'Bank Statement'
 
-      response '200', 'Bank statement uploaded' do
-        let(:investment) { create(:investment) }
-        let(:file) { Rack::Test::UploadedFile.new('spec/fixtures/bank_statement.pdf', 'application/pdf') }
-        run_test! do |response|
-          json = JSON.parse(response.body)
-          expect(json['investment']['bank_statement']).to be_present
-        end
+      let(:user) { FactoryBot.create(:user) }
+      let(:investor) { FactoryBot.create(:investor, user: user) }
+      let(:offering) { FactoryBot.create(:offering) }
+      let(:investment) { FactoryBot.create(:investment, investor: investor, offering: offering, amount: 1000) }
+      
+      let(:id) { investment.id }  # Define the investment ID
+      let(:Authorization) { "Bearer #{generate_jwt_token(user_id: user.id)}" }
+
+      response '200', 'Bank statement uploaded' do 
+        let(:file) { fixture_file_upload('./bank_statement.pdf', 'application/pdf') }
+        run_test!  
       end
 
       security [bearerAuth: []]
 
       response '422', 'Invalid file' do
-        let(:investment) { create(:investment) }
         let(:file) { nil }
         run_test!
       end

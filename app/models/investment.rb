@@ -2,7 +2,6 @@ class Investment < ApplicationRecord
   belongs_to :investor
   belongs_to :offering
 
-   
   has_one_attached :bank_statement
 
   enum status: { pending: 0, signed: 1, confirmed: 2, received: 3, hidden: 4 }
@@ -25,8 +24,7 @@ class Investment < ApplicationRecord
       transition from: [:pending, :signed, :confirmed, :received], to: :hidden
     end
   end
-
-  # Валидации
+ 
   validates :amount, presence: true
   validates :status, presence: true
   validates :offering_id, presence: true
@@ -46,20 +44,18 @@ class Investment < ApplicationRecord
   private
 
   def offering_is_open
-    errors.add(:offering, 'is not open') unless offering.status == 'collecting' || offering.status == "completed"
+    errors.add(:offering, 'must be collecting to accept investments') unless offering.collecting?
   end
 
   def amount_within_limits
     if amount.blank?
       errors.add(:amount, 'is required')
-      return
-    end
-    if amount < offering.min_target
-      errors.add(:amount, 'is below the minimum investment')
+    elsif amount < offering.min_target
+      errors.add(:amount, "can't be less than the minimum investment of #{offering.min_target}")
     elsif amount > offering.max_target
-      errors.add(:amount, 'exceeds the maximum investment')
+      errors.add(:amount, "can't exceed the maximum investment of #{offering.max_target}")
     end
-  end
+  end  
 
   def offering_not_exceeded
     if offering.funded_amount && amount.to_d > offering.max_target
@@ -68,6 +64,6 @@ class Investment < ApplicationRecord
   end
 
   def investor_kyc_approved
-    errors.add(:investor, 'KYC not approved') unless investor.kyc_status == 'approved'
-  end
+    errors.add(:investor, 'must have completed KYC approval') unless investor.kyc_status == 'approved'
+  end  
 end

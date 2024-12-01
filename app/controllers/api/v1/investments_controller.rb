@@ -31,6 +31,7 @@ module Api
 
       # POST /investments/:id/upload_bank_statement
       def upload_bank_statement
+        @investment = Investment.find(params[:id])
         if @investment.upload_bank_statement(params[:file])
           render json: { investment: @investment }, status: :ok
         else
